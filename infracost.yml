@@ -7,47 +7,53 @@ projects:
   # Dev Environment
   - path: dev/vpc
     name: dev-vpc
-
   - path: dev/app/sg
     name: dev-sg
-
   - path: dev/app/alb
     name: dev-alb
-
   - path: dev/app/ec2
     name: dev-ec2
-
   - path: dev/app/cloudwatch
     name: dev-cloudwatch
+  - path: dev/app/docdb
+    name: dev-docdb
+  - path: dev/app/iam
+    name: dev-iam
+  - path: dev/app/inspector
+    name: dev-inspector
 
   # Production Environment
   - path: production/vpc
     name: production-vpc
-
   - path: production/app/sg
     name: production-sg
-
   - path: production/app/alb
     name: production-alb
-
   - path: production/app/ec2
     name: production-ec2
-
   - path: production/app/cloudwatch
     name: production-cloudwatch
+  - path: production/app/docdb
+    name: production-docdb
+  - path: production/app/iam
+    name: production-iam
+  - path: production/app/inspector
+    name: production-inspector
 
   # Load Testing Environment
   - path: load-testing/vpc
     name: load-testing-vpc
-
   - path: load-testing/app/sg
     name: load-testing-sg
-
   - path: load-testing/app/alb
     name: load-testing-alb
-
   - path: load-testing/app/ec2
     name: load-testing-ec2
-
   - path: load-testing/app/cloudwatch
     name: load-testing-cloudwatch
+  - path: load-testing/app/docdb
+    name: load-testing-docdb
+  - path: load-testing/app/iam
+    name: load-testing-iam
+  - path: load-testing/app/inspector
+    name: load-testing-inspector
