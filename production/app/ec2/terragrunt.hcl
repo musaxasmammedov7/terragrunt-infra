@@ -1,9 +1,7 @@
 # EC2/Autoscaling Module - Production Environment
-# Creates Launch Template and Auto Scaling Group
 
-locals {
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-  environment = local.env_vars.locals.environment
+include "root" {
+  path = find_in_parent_folders("root.hcl")
 }
 
 dependency "vpc" {
@@ -23,14 +21,14 @@ terraform {
 }
 
 inputs = {
-  aws_region          = local.env_vars.locals.aws_region
-  environment         = local.env_vars.locals.environment
-  instance_type       = local.env_vars.locals.instance_type
-  key_name            = local.env_vars.locals.key_name
-  min_size            = local.env_vars.locals.min_size
-  max_size            = local.env_vars.locals.max_size
-  desired_capacity    = local.env_vars.locals.desired_capacity
-  private_subnet_ids  = dependency.vpc.outputs.private_subnet_ids
+  aws_region            = "us-east-1"
+  environment           = "production"
+  instance_type         = "t3.small"
+  key_name              = ""
+  min_size              = 2
+  max_size              = 6
+  desired_capacity      = 3
+  private_subnet_ids    = dependency.vpc.outputs.private_subnet_ids
   ec2_security_group_id = dependency.sg.outputs.ec2_security_group_id
-  target_group_arn    = dependency.alb.outputs.target_group_arn
+  target_group_arn      = dependency.alb.outputs.target_group_arn
 }

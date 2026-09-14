@@ -1,9 +1,7 @@
 # Security Groups Module - Production Environment
-# Creates ALB and EC2 security groups
 
-locals {
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-  environment = local.env_vars.locals.environment
+include "root" {
+  path = find_in_parent_folders("root.hcl")
 }
 
 dependency "vpc" {
@@ -15,7 +13,7 @@ terraform {
 }
 
 inputs = {
-  aws_region   = local.env_vars.locals.aws_region
-  environment  = local.env_vars.locals.environment
-  vpc_id       = dependency.vpc.outputs.vpc_id
+  aws_region  = "us-east-1"
+  environment = "production"
+  vpc_id      = dependency.vpc.outputs.vpc_id
 }

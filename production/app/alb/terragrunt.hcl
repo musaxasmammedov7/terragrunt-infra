@@ -1,9 +1,7 @@
 # ALB Module - Production Environment
-# Creates Application Load Balancer, Target Group, and Listener
 
-locals {
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-  environment = local.env_vars.locals.environment
+include "root" {
+  path = find_in_parent_folders("root.hcl")
 }
 
 dependency "vpc" {
@@ -19,9 +17,9 @@ terraform {
 }
 
 inputs = {
-  aws_region       = local.env_vars.locals.aws_region
-  environment      = local.env_vars.locals.environment
-  public_subnet_ids = dependency.vpc.outputs.public_subnet_ids
+  aws_region            = "us-east-1"
+  environment           = "production"
+  public_subnet_ids     = dependency.vpc.outputs.public_subnet_ids
   alb_security_group_id = dependency.sg.outputs.alb_security_group_id
-  health_check_path = local.env_vars.locals.health_check_path
+  health_check_path     = "/"
 }

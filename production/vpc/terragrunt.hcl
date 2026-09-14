@@ -1,9 +1,7 @@
 # VPC Module - Production Environment
-# This module creates VPC, subnets, internet gateway, NAT gateway, and route tables
 
-locals {
-  env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-  environment = local.env_vars.locals.environment
+include "root" {
+  path = find_in_parent_folders("root.hcl")
 }
 
 terraform {
@@ -11,9 +9,9 @@ terraform {
 }
 
 inputs = {
-  aws_region          = local.env_vars.locals.aws_region
-  environment         = local.env_vars.locals.environment
-  vpc_cidr            = local.env_vars.locals.vpc_cidr
-  public_subnet_cidrs  = local.env_vars.locals.public_subnet_cidrs
-  private_subnet_cidrs = local.env_vars.locals.private_subnet_cidrs
+  aws_region          = "us-east-1"
+  environment         = "production"
+  vpc_cidr            = "10.10.0.0/16"
+  public_subnet_cidrs  = ["10.10.1.0/24", "10.10.2.0/24"]
+  private_subnet_cidrs = ["10.10.3.0/24", "10.10.4.0/24"]
 }
