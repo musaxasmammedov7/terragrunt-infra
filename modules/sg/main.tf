@@ -103,6 +103,38 @@ resource "aws_security_group" "ec2" {
 }
 
 ###############################################################################
+# DocumentDB Security Group
+###############################################################################
+resource "aws_security_group" "docdb" {
+  name_prefix = "${local.name_prefix}-docdb-"
+  description = "Security group for DocumentDB cluster"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "MongoDB from EC2"
+    from_port       = 27017
+    to_port         = 27017
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${local.name_prefix}-docdb-sg"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+###############################################################################
 # Outputs
 ###############################################################################
 output "alb_security_group_id" {
@@ -111,4 +143,8 @@ output "alb_security_group_id" {
 
 output "ec2_security_group_id" {
   value = aws_security_group.ec2.id
+}
+
+output "docdb_security_group_id" {
+  value = aws_security_group.docdb.id
 }

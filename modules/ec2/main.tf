@@ -54,6 +54,24 @@ variable "target_group_arn" {
   type        = string
 }
 
+variable "iam_instance_profile_name" {
+  description = "IAM instance profile name (from IAM module)"
+  type        = string
+  default     = ""
+}
+
+variable "docdb_connection_string" {
+  description = "DocumentDB connection string"
+  type        = string
+  default     = ""
+}
+
+variable "docdb_db_name" {
+  description = "DocumentDB database name"
+  type        = string
+  default     = "todoDb"
+}
+
 data "aws_ami" "amazon_linux" {
   most_recent = true
   owners      = ["amazon"]
@@ -74,9 +92,10 @@ locals {
 }
 
 ###############################################################################
-# IAM Role for EC2
+# IAM Role for EC2 (used only if external iam_instance_profile_name not provided)
 ###############################################################################
 resource "aws_iam_role" "ec2_role" {
+  count = var.iam_instance_profile_name == "" ? 1 : 0
   name = "${local.name_prefix}-ec2-role"
 
   assume_role_policy = jsonencode({
@@ -96,18 +115,21 @@ resource "aws_iam_role" "ec2_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm" {
-  role       = aws_iam_role.ec2_role.name
+  count      = var.iam_instance_profile_name == "" ? 1 : 0
+  role       = aws_iam_role.ec2_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_cloudwatch" {
-  role       = aws_iam_role.ec2_role.name
+  count      = var.iam_instance_profile_name == "" ? 1 : 0
+  role       = aws_iam_role.ec2_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "${local.name_prefix}-ec2-profile"
-  role = aws_iam_role.ec2_role.name
+  count = var.iam_instance_profile_name == "" ? 1 : 0
+  name  = "${local.name_prefix}-ec2-profile"
+  role  = aws_iam_role.ec2_role[0].name
 
   tags = {
     Name = "${local.name_prefix}-ec2-profile"
@@ -136,6 +158,10 @@ locals {
         image: bencuk/nodejs-demoapp:latest
         ports:
           - "8080:3000"
+        environment:
+          - TODO_MONGO_CONNSTR=${docdb_connection_string}
+          - TODO_MONGO_DB=${docdb_db_name}
+          - NODE_ENV=production
         restart: unless-stopped
     DOCKER
 
@@ -156,7 +182,7 @@ resource "aws_launch_template" "app" {
   key_name      = var.key_name != "" ? var.key_name : null
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.ec2_profile.name
+    name = var.iam_instance_profile_name != "" ? var.iam_instance_profile_name : aws_iam_instance_profile.ec2_profile[0].name
   }
 
   network_interfaces {
