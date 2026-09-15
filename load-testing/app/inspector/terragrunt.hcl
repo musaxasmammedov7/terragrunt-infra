@@ -11,5 +11,5 @@ terraform {
 inputs = {
   aws_region          = "us-east-1"
   environment         = "load-testing"
-  notification_email  = ""
+  notification_email_secret_name = "terragrunt-infra-load-testing-notification-email"
 }
