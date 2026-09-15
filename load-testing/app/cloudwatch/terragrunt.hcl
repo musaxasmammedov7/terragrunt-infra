@@ -20,7 +20,7 @@ inputs = {
   aws_region             = "us-east-1"
   environment            = "load-testing"
   cpu_target_value       = 60
-  notification_email     = ""
+  notification_email_secret_name = "terragrunt-infra-load-testing-notification-email"
   autoscaling_group_name = dependency.ec2.outputs.autoscaling_group_name
   alb_arn_suffix         = dependency.alb.outputs.alb_arn_suffix
 }

@@ -20,7 +20,7 @@ inputs = {
   aws_region             = "us-east-1"
   environment            = "production"
   cpu_target_value       = 65
-  notification_email     = ""
+  notification_email_secret_name = "terragrunt-infra-production-notification-email"
   autoscaling_group_name = dependency.ec2.outputs.autoscaling_group_name
   alb_arn_suffix         = dependency.alb.outputs.alb_arn_suffix
 }

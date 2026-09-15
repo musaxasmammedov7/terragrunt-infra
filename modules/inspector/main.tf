@@ -13,8 +13,8 @@ variable "environment" {
   type        = string
 }
 
-variable "notification_email" {
-  description = "Email for Inspector findings"
+variable "notification_email_secret_name" {
+  description = "Name of the AWS Secrets Manager secret containing the notification email"
   type        = string
   default     = ""
 }
@@ -30,6 +30,24 @@ locals {
 }
 
 data "aws_caller_identity" "current" {}
+
+###############################################################################
+# Secrets from AWS Secrets Manager
+# Email is NEVER stored in git - read at runtime from AWS Secrets Manager.
+###############################################################################
+data "aws_secretsmanager_secret" "notification_email" {
+  count = var.notification_email_secret_name != "" ? 1 : 0
+  name  = var.notification_email_secret_name
+}
+
+data "aws_secretsmanager_secret_version" "notification_email" {
+  count     = var.notification_email_secret_name != "" ? 1 : 0
+  secret_id = data.aws_secretsmanager_secret.notification_email[0].id
+}
+
+locals {
+  notification_email = var.notification_email_secret_name != "" ? data.aws_secretsmanager_secret_version.notification_email[0].secret_string : ""
+}
 
 ###############################################################################
 # Enable AWS Inspector2
@@ -68,10 +86,10 @@ resource "aws_sns_topic_policy" "inspector_findings" {
 }
 
 resource "aws_sns_topic_subscription" "email" {
-  count     = var.notification_email != "" ? 1 : 0
+  count     = local.notification_email != "" ? 1 : 0
   topic_arn = aws_sns_topic.inspector_findings.arn
   protocol  = "email"
-  endpoint  = var.notification_email
+  endpoint  = local.notification_email
 }
 
 ###############################################################################
