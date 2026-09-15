@@ -1,0 +1,15 @@
+# Terragrunt
+.terragrunt-cache/
+terragrunt.tfvars
+*.tfvars
+!.terragrunt-cache
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Environment / secrets
+.env
+*.env

@@ -34,10 +34,9 @@ variable "master_username" {
   default     = "admin"
 }
 
-variable "master_password" {
-  description = "Master password for DocumentDB"
+variable "master_password_secret_name" {
+  description = "Name of the AWS Secrets Manager secret containing the DocumentDB master password"
   type        = string
-  sensitive   = true
 }
 
 variable "instance_class" {
@@ -81,6 +80,22 @@ locals {
 }
 
 ###############################################################################
+# Secrets from AWS Secrets Manager
+# Password is NEVER stored in git - read at runtime from AWS Secrets Manager.
+###############################################################################
+data "aws_secretsmanager_secret" "master_password" {
+  name = var.master_password_secret_name
+}
+
+data "aws_secretsmanager_secret_version" "master_password" {
+  secret_id = data.aws_secretsmanager_secret.master_password.id
+}
+
+locals {
+  master_password = data.aws_secretsmanager_secret_version.master_password.secret_string
+}
+
+###############################################################################
 # DocumentDB Subnet Group
 ###############################################################################
 resource "aws_docdb_subnet_group" "main" {
@@ -116,7 +131,7 @@ resource "aws_docdb_cluster" "main" {
   cluster_identifier      = "${local.name_prefix}-docdb"
   engine                  = "docdb"
   master_username         = var.master_username
-  master_password         = var.master_password
+  master_password         = local.master_password
   backup_retention_period = var.backup_retention_period
   preferred_backup_window = var.preferred_backup_window
   skip_final_snapshot     = var.skip_final_snapshot
@@ -170,5 +185,6 @@ output "cluster_arn" {
 }
 
 output "connection_string" {
-  value = "mongodb://${var.master_username}:${var.master_password}@${aws_docdb_cluster.main.endpoint}:27017/?tls=true&replicaSet=rs0&readPreference=secondaryPreferred"
+  value     = "mongodb://${var.master_username}:${local.master_password}@${aws_docdb_cluster.main.endpoint}:27017/?tls=true&replicaSet=rs0&readPreference=secondaryPreferred"
+  sensitive = true
 }
