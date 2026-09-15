@@ -81,7 +81,6 @@ locals {
 
 ###############################################################################
 # Secrets from AWS Secrets Manager
-# Password is NEVER stored in git - read at runtime from AWS Secrets Manager.
 ###############################################################################
 data "aws_secretsmanager_secret" "master_password" {
   name = var.master_password_secret_name
